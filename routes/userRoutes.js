@@ -4,7 +4,7 @@ const router = express.Router()
 const generateToken = require("../utility/generateToken")
 
 // POST: User Registration
-router.post("/user/register", async (req, res) => {
+router.post("/register", async (req, res) => {
   const { name, email, password } = req.body
 
   try {
