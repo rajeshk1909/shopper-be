@@ -70,7 +70,10 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id)
+
+    const {id} = req.params
+
+    const product = await Product.findById(id)
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -92,13 +95,16 @@ router.get("/:id", async (req, res) => {
 
 // PUT : Update a product by ID
 
-router.put("/", async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
+
+    const { id } = req.params
+
     const { name, price, discountPercentage, category, starRating, image } =
       req.body
 
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
+      id,
       {
         name,
         price,
@@ -133,9 +139,12 @@ router.put("/", async (req, res) => {
 
 // DELETE : Delete a product by ID
 
-router.delete("/", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id)
+
+    const {id} = req.params
+
+    const deletedProduct = await Product.findByIdAndDelete(id)
 
     if (!deletedProduct) {
       return res.status(404).json({
