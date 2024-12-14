@@ -4,7 +4,7 @@ const router = express.Router()
 
 // POST: Add a new product
 
-router.post("/products", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { name, price, discountPercentage, category, starRating, image } =
       req.body
@@ -50,7 +50,7 @@ router.post("/products", async (req, res) => {
 
 // GET: Fetch all products
 
-router.get("/products", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const products = await Product.find()
     res.status(200).json({
@@ -68,7 +68,7 @@ router.get("/products", async (req, res) => {
 
 // GET: Fetch a single product by ID
 
-router.get("/products/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
     if (!product) {
@@ -92,7 +92,7 @@ router.get("/products/:id", async (req, res) => {
 
 // PUT : Update a product by ID
 
-router.put("/products", async (req, res) => {
+router.put("/", async (req, res) => {
   try {
     const { name, price, discountPercentage, category, starRating, image } =
       req.body
@@ -133,7 +133,7 @@ router.put("/products", async (req, res) => {
 
 // DELETE : Delete a product by ID
 
-router.delete("/products", async (req, res) => {
+router.delete("/", async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id)
 

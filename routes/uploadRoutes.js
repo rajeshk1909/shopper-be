@@ -2,7 +2,7 @@ const express = require("express")
 const upload = require("../middlewares/upload")
 const router = express.Router()
 
-router.post("/upload", upload.single("product"), (req, res) => {
+router.post("/", upload.single("product"), (req, res) => {
   const host = process.env.HOST || "https://shopper-be.onrender.com/"
 
   if (!req.file) {
