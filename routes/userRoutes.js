@@ -8,11 +8,13 @@ router.post("/register", async (req, res) => {
   const { name, email, password } = req.body
 
   try {
+    // Check if the user already exists
     const userExists = await User.findOne({ email })
     if (userExists) {
       return res.status(400).json({ message: "User already exists" })
     }
 
+    // Create a new user
     const newUser = new User({
       name,
       email,
@@ -22,6 +24,7 @@ router.post("/register", async (req, res) => {
 
     await newUser.save()
 
+    // Generate token for the new user
     const token = generateToken(newUser._id, newUser.role)
 
     res.status(201).json({
@@ -40,11 +43,13 @@ router.post("/register", async (req, res) => {
   }
 })
 
+// POST: User Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body
-  try {
-    const user = await User.findOne({ email })
 
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email })
     if (!user) {
       return res.status(400).json({
         success: false,
@@ -52,8 +57,7 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    const isPasswordMatch = User.matchpassword(password)
-
+    const isPasswordMatch = await user.matchPassword(password)
     if (!isPasswordMatch) {
       return res.status(400).json({
         success: false,
@@ -61,7 +65,7 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    const token = generateToken(newUser._id, newUser.role)
+    const token = generateToken(user._id, user.role)
 
     res.json({
       success: true,

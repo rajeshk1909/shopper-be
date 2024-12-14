@@ -14,12 +14,12 @@ router.post("/register", async (req, res) => {
         .json({ message: "Access denied. Only admin can create an admin." })
     }
 
-    const userExists = await User.findOne({ email })
-    if (userExists) {
-      return res.status(400).json({ message: "User already exists" })
+    const adminExists = await Admin.findOne({ email }) // Check if the admin already exists
+    if (adminExists) {
+      return res.status(400).json({ message: "Admin already exists" })
     }
 
-    const adminUser = new User({
+    const adminUser = new Admin({
       name,
       email,
       password,
@@ -69,7 +69,7 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    const token = generateToken(newUser._id, newUser.role)
+    const token = generateToken(admin._id, admin.role) 
 
     res.json({
       success: true,
