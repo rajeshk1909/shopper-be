@@ -9,6 +9,20 @@ router.post("/register", async (req, res) => {
   const role = req.headers.role
 
   try {
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide all required fields: name, email, and password.",
+      })
+    } else if (!role) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide the role",
+      })
+    }
+
     if (role !== "admin") {
       return res.status(403).json({
         sucess: false,
@@ -63,6 +77,15 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body
 
   try {
+    // Validate required fields
+    if ( !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide all required fields: email, and password.",
+      })
+    }
+
     const admin = await Admin.findOne({ email })
 
     if (!admin) {

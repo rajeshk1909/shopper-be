@@ -8,6 +8,15 @@ router.post("/register", async (req, res) => {
   const { name, email, password } = req.body
 
   try {
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Please provide all required fields: name, email, and password.",
+      })
+    }
+
     // Check if the user already exists
     const userExists = await User.findOne({ email })
     if (userExists) {
@@ -58,6 +67,14 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body
 
   try {
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields: email, and password.",
+      })
+    }
+
     // Find the user by email
     const user = await User.findOne({ email })
     if (!user) {
