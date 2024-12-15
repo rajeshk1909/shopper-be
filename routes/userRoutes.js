@@ -11,7 +11,9 @@ router.post("/register", async (req, res) => {
     // Check if the user already exists
     const userExists = await User.findOne({ email })
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" })
+      return res
+        .status(400)
+        .json({ sucess: false, message: "User already exists" })
     }
 
     // Create a new user
@@ -27,7 +29,15 @@ router.post("/register", async (req, res) => {
     // Generate token for the new user
     const token = generateToken(newUser._id, newUser.role)
 
+    if (!token) {
+      res.status(403).json({
+        success: false,
+        message: "Token not generate",
+      })
+    }
+
     res.status(201).json({
+      sucess: true,
       message: "User registered successfully",
       token,
       user: {
@@ -39,7 +49,7 @@ router.post("/register", async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: "Server Error" })
+    res.status(500).json({ sucess: false, message: "Server Error" })
   }
 })
 
@@ -67,7 +77,7 @@ router.post("/login", async (req, res) => {
 
     const token = generateToken(user._id, user.role)
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "User logged in successfully",
       token,

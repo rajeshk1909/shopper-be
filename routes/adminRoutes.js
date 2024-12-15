@@ -6,17 +6,21 @@ const generateToken = require("../utility/generateToken")
 // POST: Admin Registration
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body
+  const role = req.headers.role
 
   try {
-    if (req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Access denied. Only admin can create an admin." })
+    if (role !== "admin") {
+      return res.status(403).json({
+        sucess: false,
+        message: "Access denied. Only admin can create an admin.",
+      })
     }
 
-    const adminExists = await Admin.findOne({ email }) // Check if the admin already exists
+    const adminExists = await Admin.findOne({ email })
     if (adminExists) {
-      return res.status(400).json({ message: "Admin already exists" })
+      return res
+        .status(400)
+        .json({ sucess: false, message: "Admin already exists" })
     }
 
     const adminUser = new Admin({
@@ -30,7 +34,15 @@ router.post("/register", async (req, res) => {
 
     const token = generateToken(adminUser._id, adminUser.role)
 
+    if (!token) {
+      res.status(403).json({
+        success: false,
+        message: "token is not generated",
+      })
+    }
+
     res.status(201).json({
+      sucess: true,
       message: "Admin registered successfully",
       token,
       user: {
@@ -42,7 +54,7 @@ router.post("/register", async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: "Server Error" })
+    res.status(500).json({ sucess: false, message: "Server Error" })
   }
 })
 
@@ -69,7 +81,7 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    const token = generateToken(admin._id, admin.role) 
+    const token = generateToken(admin._id, admin.role)
 
     res.json({
       success: true,
