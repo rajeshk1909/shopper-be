@@ -25,7 +25,7 @@ router.post("/register", async (req, res) => {
 
     if (role !== "admin") {
       return res.status(403).json({
-        sucess: false,
+        success: false,
         message: "Access denied. Only admin can create an admin.",
       })
     }
@@ -34,7 +34,7 @@ router.post("/register", async (req, res) => {
     if (adminExists) {
       return res
         .status(400)
-        .json({ sucess: false, message: "Admin already exists" })
+        .json({ success: false, message: "Admin already exists" })
     }
 
     const adminUser = new Admin({
@@ -56,7 +56,7 @@ router.post("/register", async (req, res) => {
     }
 
     res.status(201).json({
-      sucess: true,
+      success: true,
       message: "Admin registered successfully",
       token,
       user: {
@@ -68,7 +68,7 @@ router.post("/register", async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ sucess: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" })
   }
 })
 
@@ -78,11 +78,10 @@ router.post("/login", async (req, res) => {
 
   try {
     // Validate required fields
-    if ( !email || !password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide all required fields: email, and password.",
+        message: "Please provide all required fields: email, and password.",
       })
     }
 

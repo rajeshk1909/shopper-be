@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
     if (userExists) {
       return res
         .status(400)
-        .json({ sucess: false, message: "User already exists" })
+        .json({ success: false, message: "User already exists" })
     }
 
     // Create a new user
@@ -46,7 +46,7 @@ router.post("/register", async (req, res) => {
     }
 
     res.status(201).json({
-      sucess: true,
+      success: true,
       message: "User registered successfully",
       token,
       user: {
@@ -58,7 +58,7 @@ router.post("/register", async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ sucess: false, message: "Server Error" })
+    res.status(500).json({ success: false, message: "Server Error" })
   }
 })
 
