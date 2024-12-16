@@ -46,19 +46,9 @@ router.post("/register", async (req, res) => {
 
     await adminUser.save()
 
-    const token = generateToken(adminUser._id, adminUser.role)
-
-    if (!token) {
-      res.status(403).json({
-        success: false,
-        message: "token is not generated",
-      })
-    }
-
     res.status(201).json({
       success: true,
       message: "Admin registered successfully",
-      token,
       user: {
         id: adminUser._id,
         name: adminUser.name,
@@ -104,6 +94,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = generateToken(admin._id, admin.role)
+
 
     res.json({
       success: true,

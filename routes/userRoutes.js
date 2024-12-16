@@ -35,20 +35,9 @@ router.post("/register", async (req, res) => {
 
     await newUser.save()
 
-    // Generate token for the new user
-    const token = generateToken(newUser._id, newUser.role)
-
-    if (!token) {
-      res.status(403).json({
-        success: false,
-        message: "Token not generate",
-      })
-    }
-
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      token,
       user: {
         id: newUser._id,
         name: newUser.name,
