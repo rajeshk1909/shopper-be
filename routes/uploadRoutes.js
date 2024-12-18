@@ -8,12 +8,13 @@ router.post("/", upload.single("product"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({
       success: 0,
-      error: "No file uploaded",
+      message: "File is required",
     })
   }
 
   res.status(200).json({
     success: true,
+    message: "File Successfuly uploaded",
     image_url: `${host}/images/${req.file.filename}`,
   })
 })
