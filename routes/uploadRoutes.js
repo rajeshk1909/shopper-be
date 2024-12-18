@@ -13,7 +13,7 @@ router.post("/", upload.single("product"), (req, res) => {
   }
 
   res.status(200).json({
-    success: 1,
+    success: true,
     image_url: `${host}/images/${req.file.filename}`,
   })
 })
