@@ -112,6 +112,7 @@ router.put("/:id", async (req, res) => {
         category,
         starRating,
         image,
+        discountPrice,
       },
       { new: true }
     )
