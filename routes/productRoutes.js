@@ -108,6 +108,21 @@ router.put("/:id", async (req, res) => {
       discountPrice,
     } = req.body
 
+    if (
+      !name ||
+      !price ||
+      !discountPercentage ||
+      !category ||
+      !starRating ||
+      !image ||
+      !discountPrice
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Please provide all required fields",
+      })
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
