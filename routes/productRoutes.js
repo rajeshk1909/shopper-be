@@ -70,8 +70,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-
-    const {id} = req.params
+    const { id } = req.params
 
     const product = await Product.findById(id)
     if (!product) {
@@ -97,11 +96,17 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-
     const { id } = req.params
 
-    const { name, price, discountPercentage, category, starRating, image } =
-      req.body
+    const {
+      name,
+      price,
+      discountPercentage,
+      category,
+      starRating,
+      image,
+      discountPrice,
+    } = req.body
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
@@ -142,8 +147,7 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-
-    const {id} = req.params
+    const { id } = req.params
 
     const deletedProduct = await Product.findByIdAndDelete(id)
 
