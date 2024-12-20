@@ -18,7 +18,9 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: false,
       default: function () {
-        return this.price - this.price * (this.discountPercentage / 100)
+        return Math.floor(
+          this.price - this.price * (this.discountPercentage / 100)
+        )
       },
     },
     category: {
