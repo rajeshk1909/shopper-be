@@ -62,6 +62,32 @@ router.post("/register", async (req, res) => {
   }
 })
 
+// GET : Fetch a Admin by Id
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const admin = await Admin.findById(id)
+
+    if (!admin) {
+      res.status(404).json({
+        success: false,
+        message: "Admin not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      admin: admin,
+    })
+  } catch (error) {
+    console.error(error)
+    res.send(500).json({
+      success: false,
+      message: "Internal Server Error",
+    })
+  }
+})
+
 // POST : Admin login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body
@@ -94,7 +120,6 @@ router.post("/login", async (req, res) => {
     }
 
     const token = generateToken(admin._id, admin.role)
-
 
     res.json({
       success: true,

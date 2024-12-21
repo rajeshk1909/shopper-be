@@ -51,53 +51,52 @@ router.post("/cart", async (req, res) => {
 
 // POST: Add product to wishlist
 router.post("/wishlist", async (req, res) => {
-  const { productId, userId } = req.body;
+  const { productId, userId } = req.body
 
   try {
     if (!productId || !userId) {
       return res.status(400).json({
         success: false,
         message: "Product ID and user ID are required",
-      });
+      })
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId)
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
-      });
+      })
     }
 
     const isProductInWishlist = user.wishlist.some(
       (item) => item.toString() === productId
-    );
+    )
 
     if (isProductInWishlist) {
       return res.status(400).json({
         success: false,
         message: "Product is already in the wishlist",
-      });
+      })
     }
 
-    user.wishlist.push(productId);
+    user.wishlist.push(productId)
 
-    await user.save();
+    await user.save()
 
     res.status(200).json({
       success: true,
       message: "Product added to wishlist successfully",
       wishlist: user.wishlist,
-    });
+    })
   } catch (error) {
-    console.error(error);
+    console.error(error)
     res.status(500).json({
       success: false,
       message: "Server error",
-    });
+    })
   }
-});
-
+})
 
 // POST: User Registration
 router.post("/register", async (req, res) => {
@@ -144,6 +143,32 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ success: false, message: "Server Error" })
+  }
+})
+
+// GET : Fetch a user by Id
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById(id)
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      user: user,
+    })
+  } catch (error) {
+    console.error(error)
+    res.send(500).json({
+      success: false,
+      message: "Internal Server Error",
+    })
   }
 })
 
