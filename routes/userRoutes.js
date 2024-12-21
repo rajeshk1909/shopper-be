@@ -3,6 +3,102 @@ const User = require("../models/userModel")
 const router = express.Router()
 const generateToken = require("../utility/generateToken")
 
+// POST: Add product to cart
+router.post("/cart", async (req, res) => {
+  const { productId, quantity, userId } = req.body
+
+  try {
+    if (!productId || !quantity || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID, quantity, and user ID are required",
+      })
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    const existingProduct = user.cart.find(
+      (item) => item.product.toString() === productId
+    )
+
+    if (existingProduct) {
+      existingProduct.quantity = quantity
+    } else {
+      user.cart.push({ product: productId, quantity })
+    }
+
+    await user.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Product added to cart successfully",
+      cart: user.cart,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    })
+  }
+})
+
+// POST: Add product to wishlist
+router.post("/wishlist", async (req, res) => {
+  const { productId, userId } = req.body;
+
+  try {
+    if (!productId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and user ID are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const isProductInWishlist = user.wishlist.some(
+      (item) => item.toString() === productId
+    );
+
+    if (isProductInWishlist) {
+      return res.status(400).json({
+        success: false,
+        message: "Product is already in the wishlist",
+      });
+    }
+
+    user.wishlist.push(productId);
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Product added to wishlist successfully",
+      wishlist: user.wishlist,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+
 // POST: User Registration
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body
