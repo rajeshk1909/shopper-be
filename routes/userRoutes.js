@@ -229,7 +229,7 @@ router.post("/login", async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .cookie("token", token, {
         httpOnly: true,
@@ -237,8 +237,14 @@ router.post("/login", async (req, res) => {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
+      .cookie("role", user.role.toString(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
 
-    // Send response
+    // Send response 
     res.status(200).json({
       success: true,
       message: "User logged in successfully",

@@ -1,7 +1,6 @@
 const express = require("express")
 const Admin = require("../models/adminModel")
 const router = express.Router()
-const generateToken = require("../utility/generateToken")
 
 // POST: Admin Registration
 router.post("/register", async (req, res) => {
@@ -120,7 +119,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: admin._id, role: admin.role },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
@@ -128,13 +127,19 @@ router.post("/login", async (req, res) => {
     )
 
     res
-      .cookie("userId", user._id.toString(), {
+      .cookie("userId", admin._id.toString(), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie("role", admin.role.toString(), {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
