@@ -1,6 +1,12 @@
 const express = require("express")
 const Admin = require("../models/adminModel")
+const jwt = require("jsonwebtoken")
+const cookieParser = require("cookie-parser")
+const bcrypt = require("bcryptjs") 
+require("dotenv").config()
+
 const router = express.Router()
+router.use(cookieParser())
 
 // POST: Admin Registration
 router.post("/register", async (req, res) => {
@@ -8,38 +14,34 @@ router.post("/register", async (req, res) => {
   const role = req.headers.role
 
   try {
-    // Validate required fields
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !role) {
       return res.status(400).json({
         success: false,
-        message:
-          "Please provide all required fields: name, email, and password.",
-      })
-    } else if (!role) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide the role",
+        message: "All fields are required: name, email, password, role.",
       })
     }
 
     if (role !== "admin") {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Only admin can create an admin.",
+        message: "Only admin can create an admin.",
       })
     }
 
     const adminExists = await Admin.findOne({ email })
     if (adminExists) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Admin already exists" })
+      return res.status(400).json({
+        success: false,
+        message: "Admin already exists.",
+      })
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     const adminUser = new Admin({
       name,
       email,
-      password,
+      password: hashedPassword,
       role: "admin",
     })
 
@@ -47,7 +49,7 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Admin registered successfully",
+      message: "Admin registered successfully.",
       user: {
         id: adminUser._id,
         name: adminUser.name,
@@ -61,33 +63,33 @@ router.post("/register", async (req, res) => {
   }
 })
 
-// GET : Fetch a Admin by Id
+// GET: Fetch Admin by ID
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params
     const admin = await Admin.findById(id)
 
     if (!admin) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
-        message: "Admin not found",
+        message: "Admin not found.",
       })
     }
 
     res.status(200).json({
       success: true,
-      admin: admin,
+      admin,
     })
   } catch (error) {
     console.error(error)
-    res.send(500).json({
+    res.status(500).json({
       success: false,
-      message: "Internal Server Error",
+      message: "Internal Server Error.",
     })
   }
 })
 
-// POST : Admin login
+// POST: Admin Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body
 
@@ -96,60 +98,55 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields: email, and password.",
+        message: "Email and password are required.",
       })
     }
 
+    // Find admin by email
     const admin = await Admin.findOne({ email })
-
     if (!admin) {
       return res.status(400).json({
         success: false,
-        message: "Invalid admin email",
+        message: "Invalid email or password.",
       })
     }
 
-    const isPasswordMatch = await admin.matchPassword(password)
-
+    const isPasswordMatch = await bcrypt.compare(password, admin.password)
     if (!isPasswordMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid admin password",
+        message: "Invalid email or password.",
       })
     }
 
     const token = jwt.sign(
       { id: admin._id, role: admin.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" } 
     )
 
-    res
-      .cookie("userId", admin._id.toString(), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .cookie("token", token, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .cookie("role", admin.role.toString(), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
+    res.cookie("jwt", token, {
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: "strict", 
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    })
+    res.cookie("id", admin._id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+    res.cookie("role", admin.role, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
 
-    res.json({
+    res.status(200).json({
       success: true,
-      message: "Admin logged in successfully",
-      token,
+      message: "Admin logged in successfully.",
       user: {
         id: admin._id,
         name: admin.name,
@@ -161,9 +158,10 @@ router.post("/login", async (req, res) => {
     console.error(error)
     res.status(500).json({
       success: false,
-      message: "Server Error",
+      message: "Server Error.",
     })
   }
 })
+
 
 module.exports = router

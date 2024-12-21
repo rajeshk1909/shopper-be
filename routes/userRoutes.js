@@ -2,6 +2,7 @@ const express = require("express")
 const User = require("../models/userModel")
 const router = express.Router()
 const jwt = require("jsonwebtoken")
+const cookieParser = require("cookie-parser")
 
 // POST: Add product to cart
 router.post("/cart", async (req, res) => {
@@ -174,12 +175,12 @@ router.get("/:id", async (req, res) => {
 
 router.post("/logout", (req, res) => {
   res
-    .clearCookie("userId", {
+    .clearCookie("jwt", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     })
-    .clearCookie("token", {
+    .clearCookie("id", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -202,7 +203,7 @@ router.post("/login", async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields: email, and password.",
+        message: "Please provide all required fields: email and password.",
       })
     }
 
@@ -210,7 +211,7 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid user email",
+        message: "Invalid email or password.",
       })
     }
 
@@ -218,42 +219,39 @@ router.post("/login", async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(400).json({
         success: false,
-        message: "Incorrect password",
+        message: "Invalid email or password.",
       })
     }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d", 
-      }
+      { expiresIn: "7d" }
     )
 
-    res
-      .cookie("userId", user._id.toString(), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .cookie("token", token, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .cookie("role", user.role.toString(), {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    })
+    res.cookie("id", user._id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    })
+    res.cookie("role", user.role, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    })
 
-    // Send response 
+    // Send response
     res.status(200).json({
       success: true,
-      message: "User logged in successfully",
+      message: "User logged in successfully.",
       user: {
         id: user._id,
         name: user.name,
@@ -265,9 +263,10 @@ router.post("/login", async (req, res) => {
     console.error(error)
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Server error.",
     })
   }
 })
+
 
 module.exports = router
