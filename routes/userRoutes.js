@@ -1,6 +1,7 @@
 const express = require("express")
 const User = require("../models/userModel")
 const router = express.Router()
+const jwt = require("jsonwebtoken")
 
 // POST: Add product to cart
 router.post("/cart", async (req, res) => {
