@@ -175,12 +175,17 @@ router.get("/:id", async (req, res) => {
 router.post("/logout", (req, res) => {
   res
     .clearCookie("userId", {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     })
     .clearCookie("token", {
-      httpOnly: true,
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    })
+    .clearCookie("role", {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     })
@@ -227,19 +232,19 @@ router.post("/login", async (req, res) => {
 
     res
       .cookie("userId", user._id.toString(), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .cookie("token", token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .cookie("role", user.role.toString(), {
-        httpOnly: true,
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
