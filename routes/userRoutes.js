@@ -1,7 +1,6 @@
 const express = require("express")
 const User = require("../models/userModel")
 const router = express.Router()
-const generateToken = require("../utility/generateToken")
 
 // POST: Add product to cart
 router.post("/cart", async (req, res) => {
@@ -172,6 +171,22 @@ router.get("/:id", async (req, res) => {
   }
 })
 
+router.post("/logout", (req, res) => {
+  res
+    .clearCookie("userId", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    })
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    })
+
+  res.status(200).json({ message: "Logged out successfully" })
+})
+
 // POST: User Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body
@@ -185,7 +200,6 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    // Find the user by email
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(400).json({
@@ -202,12 +216,32 @@ router.post("/login", async (req, res) => {
       })
     }
 
-    const token = generateToken(user._id, user.role)
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d", 
+      }
+    )
 
+    res
+      .cookie("userId", user._id.toString(), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, 
+      })
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+
+    // Send response
     res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      token,
       user: {
         id: user._id,
         name: user.name,
