@@ -8,13 +8,11 @@ const adminRoutes = require("./routes/adminRoutes")
 const userRoutes = require("./routes/userRoutes")
 const path = require("path")
 const cors = require("cors")
-const cookieParser = require("cookie-parser")
 
 const app = express()
 
 // Middleware
 app.use(express.json())
-app.use(cookieParser())
 
 // Configure CORS
 const allowedOrigins = [

@@ -2,7 +2,6 @@ const express = require("express")
 const User = require("../models/userModel")
 const router = express.Router()
 const jwt = require("jsonwebtoken")
-const cookieParser = require("cookie-parser")
 
 // POST: Add product to cart
 router.post("/cart", async (req, res) => {
@@ -173,27 +172,6 @@ router.get("/:id", async (req, res) => {
   }
 })
 
-router.post("/logout", (req, res) => {
-  res
-    .clearCookie("jwt", {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    })
-    .clearCookie("id", {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    })
-    .clearCookie("role", {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    })
-
-  res.status(200).json({ message: "Logged out successfully" })
-})
-
 // POST: User Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body
@@ -229,34 +207,17 @@ router.post("/login", async (req, res) => {
       { expiresIn: "7d" }
     )
 
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-    })
-    res.cookie("id", user._id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-    })
-    res.cookie("role", user.role, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-    })
-
     // Send response
     res.status(200).json({
       success: true,
       message: "User logged in successfully.",
       user: {
+        token,
         id: user._id,
         name: user.name,
-        email: user.email,
         role: user.role,
+        cart: user.cart,
+        wishlist: user.wishlist,
       },
     })
   } catch (error) {
@@ -267,6 +228,5 @@ router.post("/login", async (req, res) => {
     })
   }
 })
-
 
 module.exports = router

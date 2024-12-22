@@ -1,12 +1,10 @@
 const express = require("express")
+const router = express.Router()
 const Admin = require("../models/adminModel")
 const jwt = require("jsonwebtoken")
-const cookieParser = require("cookie-parser")
 const bcrypt = require("bcryptjs") 
 require("dotenv").config()
 
-const router = express.Router()
-router.use(cookieParser())
 
 // POST: Admin Registration
 router.post("/register", async (req, res) => {
@@ -122,35 +120,16 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: admin._id, role: admin.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" } 
+      { expiresIn: "7d" }
     )
-
-    res.cookie("jwt", token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production", 
-      sameSite: "strict", 
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-    })
-    res.cookie("id", admin._id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
-    res.cookie("role", admin.role, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
 
     res.status(200).json({
       success: true,
       message: "Admin logged in successfully.",
       user: {
+        token,
         id: admin._id,
         name: admin.name,
-        email: admin.email,
         role: admin.role,
       },
     })
@@ -162,6 +141,5 @@ router.post("/login", async (req, res) => {
     })
   }
 })
-
 
 module.exports = router
