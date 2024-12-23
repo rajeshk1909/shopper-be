@@ -17,7 +17,7 @@ app.use(express.json())
 // Configure CORS
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://shopper-frontend-d6cj.onrender.com",
+  "https://buyspot.vercel.app",
   "https://shopsphere-fe.onrender.com",
 ]
 
