@@ -49,6 +49,94 @@ router.post("/cart", async (req, res) => {
   }
 })
 
+router.delete("/cart", async (req, res) => {
+  const { productId, userId } = req.body
+
+  try {
+    // Validate input
+    if (!productId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and user ID are required",
+      })
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    user.cart = user.cart.filter(
+      (item) => item.product.toString() !== productId
+    )
+
+    await user.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Product removed from cart successfully",
+      cart: user.cart, 
+    })
+  } catch (error) {
+    console.error("Error removing product from cart:", error.message)
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while removing the product from cart",
+    })
+  }
+})
+
+router.put("/cart", async (req, res) => {
+  const { productId, quantity, userId } = req.body
+
+  try {
+    if (!productId || !quantity || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID, quantity, and user ID are required",
+      })
+    }
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    const product = user.cart.find(
+      (item) => item.product.toString() === productId
+    )
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found in cart",
+      })
+    }
+
+    product.quantity = quantity
+    await user.save()
+
+    res.status(200).json({
+      success: true,
+      message: "Cart updated successfully",
+      cart: user.cart,
+    })
+  } catch (error) {
+    console.error("Error updating cart:", error.message)
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the cart",
+    })
+  }
+})
+
+
 // POST: Add product to wishlist
 router.post("/wishlist", async (req, res) => {
   const { productId, userId } = req.body
@@ -97,6 +185,51 @@ router.post("/wishlist", async (req, res) => {
     })
   }
 })
+
+// DELETE: Remove product to wishlist
+
+router.delete("/wishlist", async (req, res) => {
+  const { userId, productId } = req.body
+
+  try {
+    // Validate input
+    if (!userId || !productId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID and user ID are required",
+      })
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      })
+    }
+
+    const updatedWishlist = user.wishlist.filter(
+      (item) => item.toString() !== productId
+    )
+
+    user.wishlist = updatedWishlist
+    await user.save()
+
+    return res.status(200).json({
+      success: true,
+      message: "Product removed from wishlist",
+      wishlist: user.wishlist, 
+    })
+  } catch (error) {
+    console.error("Error removing product from wishlist:", error.message)
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while removing the product from wishlist",
+    })
+  }
+})
+
 
 // POST: User Registration
 router.post("/register", async (req, res) => {
@@ -177,7 +310,6 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body
 
   try {
-    // Validate required fields
     if (!email || !password) {
       return res.status(400).json({
         success: false,
