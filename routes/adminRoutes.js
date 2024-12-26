@@ -1,10 +1,8 @@
+require("dotenv").config()
 const express = require("express")
 const router = express.Router()
 const Admin = require("../models/adminModel")
 const jwt = require("jsonwebtoken")
-const bcrypt = require("bcryptjs") 
-require("dotenv").config()
-
 
 // POST: Admin Registration
 router.post("/register", async (req, res) => {
@@ -34,12 +32,10 @@ router.post("/register", async (req, res) => {
       })
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
-
     const adminUser = new Admin({
       name,
       email,
-      password: hashedPassword,
+      password,
       role: "admin",
     })
 
@@ -102,14 +98,17 @@ router.post("/login", async (req, res) => {
 
     // Find admin by email
     const admin = await Admin.findOne({ email })
+
     if (!admin) {
       return res.status(400).json({
+        email,
+        password,
         success: false,
         message: "Invalid email or password.",
       })
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, admin.password)
+    const isPasswordMatch = await admin.matchPassword(password)
     if (!isPasswordMatch) {
       return res.status(400).json({
         success: false,
